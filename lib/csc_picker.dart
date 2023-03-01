@@ -534,6 +534,8 @@ class CSCPicker extends StatefulWidget {
     this.layout = Layout.horizontal,
     this.showStates = true,
     this.showCities = true,
+    this.hideStatesWhenNone = false,
+    this.hideCitiesWhenNone = false,
     this.defaultCountry,
     this.currentCountry,
     this.currentState,
@@ -561,7 +563,7 @@ class CSCPicker extends StatefulWidget {
   ///Parameters to change style of CSC Picker
   final TextStyle? selectedItemStyle, dropdownHeadingStyle, dropdownItemStyle;
   final BoxDecoration? dropdownDecoration, disabledDropdownDecoration;
-  final bool showStates, showCities;
+  final bool showStates, showCities, hideStatesWhenNone, hideCitiesWhenNone;
   final CountryFlag flagState;
   final Layout layout;
   final double? searchBarRadius;
@@ -833,9 +835,10 @@ class CSCPickerState extends State<CSCPicker> {
                           : Container(),
                     ],
                   ),
-                  SizedBox(
+                  widget.showStates ? SizedBox(
                     height: 10.0,
-                  ),
+                  )
+                  :Container(),
                   widget.showStates && widget.showCities
                       ? cityDropdown()
                       : Container()
@@ -912,10 +915,11 @@ class CSCPickerState extends State<CSCPicker> {
 
   ///State Dropdown Widget
   Widget stateDropdown() {
+    if(widget.hideStatesWhenNone && _states.length == 0) return Container();
     return DropdownWithSearch(
       title: widget.stateDropdownLabel,
       placeHolder: widget.stateSearchPlaceholder,
-      disabled: _states.length == 0 ? true : false,
+      disabled: (_states.length == 0 || widget.disableCountry) ? true : false,
       items: _states.map((String? dropDownStringItem) {
         return dropDownStringItem;
       }).toList(),
@@ -940,10 +944,11 @@ class CSCPickerState extends State<CSCPicker> {
 
   ///City Dropdown Widget
   Widget cityDropdown() {
+    if(widget.hideCitiesWhenNone && _cities.length == 0) return Container();
     return DropdownWithSearch(
       title: widget.cityDropdownLabel,
       placeHolder: widget.citySearchPlaceholder,
-      disabled: _cities.length == 0 ? true : false,
+      disabled: (_cities.length == 0 || widget.disableCountry) ? true : false,
       items: _cities.map((String? dropDownStringItem) {
         return dropDownStringItem;
       }).toList(),
