@@ -915,7 +915,7 @@ class CSCPickerState extends State<CSCPicker> {
 
   ///State Dropdown Widget
   Widget stateDropdown() {
-    if(widget.hideStatesWhenNone && _states.length == 0) return Container();
+    if(widget.hideStatesWhenNone || _states.length == 0) return Container();
     return DropdownWithSearch(
       title: widget.stateDropdownLabel,
       placeHolder: widget.stateSearchPlaceholder,
