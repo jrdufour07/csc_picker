@@ -655,6 +655,7 @@ class CSCPickerState extends State<CSCPicker> {
     var model = Country();
     model.name = data['name'];
     model.emoji = data['emoji'];
+    model.iso2 = data['iso2'];
     if (!mounted) return;
     setState(() {
       _country.add(model);
