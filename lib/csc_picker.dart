@@ -551,12 +551,12 @@ class CSCPicker extends StatefulWidget {
   }) : super(key: key);
 
   final ValueChanged<Country>? onCountryChanged;
-  final ValueChanged<String?>? onStateChanged;
-  final ValueChanged<String?>? onCityChanged;
+  final ValueChanged<Region?>? onStateChanged;
+  final ValueChanged<City?>? onCityChanged;
 
   final Country? currentCountry;
-  final String? currentState;
-  final String? currentCity;
+  final Region? currentState;
+  final City? currentCity;
 
   final bool disableCountry;
 
@@ -586,14 +586,14 @@ class CSCPicker extends StatefulWidget {
 }
 
 class CSCPickerState extends State<CSCPicker> {
-  List<String?> _cities = [];
   List<Country?> _country = [];
-  List<String?> _states = [];
+  List<Region?> _states = [];
+  List<City?> _cities = [];
   List<CscCountry> _countryFilter = [];
 
-  String _selectedCity = 'City';
+  City? _selectedCity;
   Country? _selectedCountry;
-  String _selectedState = 'State';
+  Region? _selectedState;
   var responses;
 
   @override
@@ -604,8 +604,8 @@ class CSCPickerState extends State<CSCPicker> {
       _countryFilter = widget.countryFilter!;
     }
     getCountries();
-    _selectedCity = widget.cityDropdownLabel;
-    _selectedState = widget.stateDropdownLabel;
+    // _selectedCity = widget.cityDropdownLabel;
+    // _selectedState = widget.stateDropdownLabel;
   }
 
   Future<void> setDefaults() async {
@@ -641,24 +641,12 @@ class CSCPickerState extends State<CSCPicker> {
   ///get countries from json response
   Future<List<Country?>> getCountries() async {
     _country.clear();
-    // var countries = await getResponse() as List;
-    // if (_countryFilter.isNotEmpty) {
-    //   _countryFilter.forEach((element) {
-    //     var result = countries[Countries[element]!];
-    //     if(result!=null) addCountryToList(result);
-    //   });
-    // } else {
-    //   countries.forEach((data) {
-    //     addCountryToList(data);
-    //   });
-    // }
-
     var countries = await getResponse() as List;
     countries.forEach((data) {
       addCountryToList(data);
     });
 
-    // _setDefaultCountry();
+    //_setDefaultCountry();
     return _country;
   }
 
@@ -670,81 +658,34 @@ class CSCPickerState extends State<CSCPicker> {
     if (!mounted) return;
     setState(() {
       _country.add(model);
-      // widget.flagState == CountryFlag.ENABLE ||
-      //         widget.flagState == CountryFlag.SHOW_IN_DROP_DOWN_ONLY
-      //     ? _country.add(model.emoji! +
-      //         "    " +
-      //         model.name!) /* : _country.add(model.name)*/
-      //     : _country.add(model.name);
     });
   }
 
   ///get states from json response
-  Future<List<String?>> getStates() async {
+  Future<List<Region?>> getStates() async {
     _states.clear();
-    //print(_selectedCountry);
     var response = await getResponse();
-    var takeState = widget.flagState == CountryFlag.ENABLE ||
-            widget.flagState == CountryFlag.SHOW_IN_DROP_DOWN_ONLY
-        ? response
-            .map((map) => Country.fromJson(map))
-            .where(
-                (item) => item.emoji + "    " + item.name == _selectedCountry)
-            .map((item) => item.state)
-            .toList()
-        : response
-            .map((map) => Country.fromJson(map))
-            .where((item) => item.name == _selectedCountry)
-            .map((item) => item.state)
-            .toList();
-    var states = takeState as List;
-    states.forEach((f) {
+    List<Country> c = response.map<Country>((i)=> Country.fromJson(i)).toList();
+    List<Region> r = c.where((c) => c.name == _selectedCountry?.name).first.state!;
+    r.forEach((f) {
       if (!mounted) return;
       setState(() {
-        var name = f.map((item) => item.name).toList();
-        for (var stateName in name) {
-          //print(stateName.toString());
-          _states.add(stateName.toString());
-        }
+        _states.add(f);
       });
     });
-    _states.sort((a, b) => a!.compareTo(b!));
+   _states.sort((a, b) => a!.name!.compareTo(b!.name!));
     return _states;
   }
 
   ///get cities from json response
-  Future<List<String?>> getCities() async {
+  Future<List<City?>> getCities() async {
     _cities.clear();
     var response = await getResponse();
-    var takeCity = widget.flagState == CountryFlag.ENABLE ||
-            widget.flagState == CountryFlag.SHOW_IN_DROP_DOWN_ONLY
-        ? response
-            .map((map) => Country.fromJson(map))
-            .where(
-                (item) => item.emoji + "    " + item.name == _selectedCountry)
-            .map((item) => item.state)
-            .toList()
-        : response
-            .map((map) => Country.fromJson(map))
-            .where((item) => item.name == _selectedCountry)
-            .map((item) => item.state)
-            .toList();
-    var cities = takeCity as List;
-    cities.forEach((f) {
-      var name = f.where((item) => item.name == _selectedState);
-      var cityName = name.map((item) => item.city).toList();
-      cityName.forEach((ci) {
-        if (!mounted) return;
-        setState(() {
-          var citiesName = ci.map((item) => item.name).toList();
-          for (var cityName in citiesName) {
-            //print(cityName.toString());
-            _cities.add(cityName.toString());
-          }
-        });
-      });
-    });
-    _cities.sort((a, b) => a!.compareTo(b!));
+    List<Country> c = response.map<Country>((i)=> Country.fromJson(i)).toList();
+    List<Region> r = c.where((c) => c.name == _selectedCountry?.name).first.state!;
+    List<City> p = r.where((i) => i.name == _selectedState?.name).first.city!;
+    _cities.addAll(p);
+    _cities.sort((a, b) => a!.name!.compareTo(b!.name!));
     return _cities;
   }
 
@@ -762,8 +703,8 @@ class CSCPickerState extends State<CSCPicker> {
       if (value != _selectedCountry) {
         _states.clear();
         _cities.clear();
-        _selectedState = widget.stateDropdownLabel;
-        _selectedCity = widget.cityDropdownLabel;
+        _selectedState = Region(name: widget.stateDropdownLabel);
+        _selectedCity = City(name: widget.cityDropdownLabel);
         this.widget.onStateChanged!(null);
         this.widget.onCityChanged!(null);
         _selectedCountry = value;
@@ -775,14 +716,14 @@ class CSCPickerState extends State<CSCPicker> {
     });
   }
 
-  void _onSelectedState(String value) {
+  void _onSelectedState(Region value) {
     if (!mounted) return;
     setState(() {
       this.widget.onStateChanged!(value);
       //code added in if condition
-      if (value != _selectedState) {
+      if (value.name != _selectedState?.name) {
         _cities.clear();
-        _selectedCity = widget.cityDropdownLabel;
+        _selectedCity = City(name: widget.cityDropdownLabel);
         this.widget.onCityChanged!(null);
         _selectedState = value;
         getCities();
@@ -792,7 +733,7 @@ class CSCPickerState extends State<CSCPicker> {
     });
   }
 
-  void _onSelectedCity(String value) {
+  void _onSelectedCity(City value) {
     if (!mounted) return;
     setState(() {
       //code added in if condition
@@ -868,9 +809,9 @@ class CSCPickerState extends State<CSCPicker> {
   }
 
   ///filter Sate Data according to user input
-  Future<List<String?>> getStateData(filter) async {
+  Future<List<Region?>> getStateData(filter) async {
     var filteredList = _states
-        .where((state) => state!.toLowerCase().contains(filter.toLowerCase()))
+        .where((state) => state!.name!.toLowerCase().contains(filter.toLowerCase()))
         .toList();
     if (filteredList.isEmpty)
       return _states;
@@ -879,9 +820,9 @@ class CSCPickerState extends State<CSCPicker> {
   }
 
   ///filter City Data according to user input
-  Future<List<String?>> getCityData(filter) async {
+  Future<List<City?>> getCityData(filter) async {
     var filteredList = _cities
-        .where((city) => city!.toLowerCase().contains(filter.toLowerCase()))
+        .where((city) => city!.name!.toLowerCase().contains(filter.toLowerCase()))
         .toList();
     if (filteredList.isEmpty)
       return _cities;
@@ -909,8 +850,6 @@ class CSCPickerState extends State<CSCPicker> {
       selected: _selectedCountry != null
           ? _selectedCountry
           : widget.countryDropdownLabel,
-      //selected: _selectedCountry != null ? _selectedCountry : "Country",
-      //onChanged: (value) => _onSelectedCountry(value),
       onChanged: (value) {
         print("countryChanged $value $_selectedCountry");
         if (value != null) {
@@ -922,12 +861,12 @@ class CSCPickerState extends State<CSCPicker> {
 
   ///State Dropdown Widget
   Widget stateDropdown() {
-    if(widget.hideStatesWhenNone || _states.length == 0) return Container();
+    if(widget.hideStatesWhenNone || _country.length == 0) return Container();
     return DropdownWithSearch(
       title: widget.stateDropdownLabel,
       placeHolder: widget.stateSearchPlaceholder,
       disabled: (_states.length == 0 || widget.disableCountry) ? true : false,
-      items: _states.map((String? dropDownStringItem) {
+      items: _states.map((Region? dropDownStringItem) {
         return dropDownStringItem;
       }).toList(),
       selectedItemStyle: widget.selectedItemStyle,
@@ -939,12 +878,10 @@ class CSCPickerState extends State<CSCPicker> {
       disabledDecoration: widget.disabledDropdownDecoration,
       selected: _selectedState,
       label: widget.stateSearchPlaceholder,
-      //onChanged: (value) => _onSelectedState(value),
       onChanged: (value) {
-        //print("stateChanged $value $_selectedState");
         value != null
             ? _onSelectedState(value)
-            : _onSelectedState(_selectedState);
+            : _onSelectedState(_selectedState!);
       },
     );
   }
@@ -956,7 +893,7 @@ class CSCPickerState extends State<CSCPicker> {
       title: widget.cityDropdownLabel,
       placeHolder: widget.citySearchPlaceholder,
       disabled: (_cities.length == 0 || widget.disableCountry) ? true : false,
-      items: _cities.map((String? dropDownStringItem) {
+      items: _cities.map((City? dropDownStringItem) {
         return dropDownStringItem;
       }).toList(),
       selectedItemStyle: widget.selectedItemStyle,
@@ -971,7 +908,7 @@ class CSCPickerState extends State<CSCPicker> {
       //onChanged: (value) => _onSelectedCity(value),
       onChanged: (value) {
         //print("cityChanged $value $_selectedCity");
-        value != null ? _onSelectedCity(value) : _onSelectedCity(_selectedCity);
+        value != null ? _onSelectedCity(value) : _onSelectedCity(_selectedCity!);
       },
     );
   }

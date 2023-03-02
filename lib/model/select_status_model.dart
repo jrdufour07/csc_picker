@@ -9,6 +9,16 @@ class Country {
   int? countrycode;
   List<Region>? state;
 
+
+  @override
+  String toString( ) {
+    String val = "";
+    val += emoji ?? "";
+    val += "   " + name!;
+    return val;
+  }
+
+
   Country(
       {this.id,
       this.name,
@@ -61,6 +71,12 @@ class Region {
   List<City>? city;
   String? regionCode;
 
+
+  @override
+  String toString() {
+    return name ?? "";
+  }
+
   Region({this.id, this.name, this.countryId, this.city, this.regionCode});
 
   Region.fromJson(Map<String, dynamic> json) {
@@ -95,6 +111,12 @@ class City {
   int? stateId;
 
   City({this.id, this.name, this.stateId});
+
+
+  @override
+  String toString() {
+    return name??"";
+  }
 
   City.fromJson(Map<String, dynamic> json) {
     id = json['id'];
