@@ -56,9 +56,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   ///Enable disable state dropdown [OPTIONAL PARAMETER]
                   showStates: true,
 
+
                   /// Enable disable city drop down [OPTIONAL PARAMETER]
                   showCities: true,
-
+                  hideStatesWhenNone: true,
+                  hideCitiesWhenNone: true,
                   ///Enable (get flag with country name) / Disable (Disable flag) / ShowInDropdownOnly (display flag in dropdown only) [OPTIONAL PARAMETER]
                   flagState: CountryFlag.DISABLE,
 
@@ -82,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   citySearchPlaceholder: "City",
 
                   ///labels for dropdown
-                  countryDropdownLabel: "Country",
+                  countryDropdownLabel: "Canada",
                   stateDropdownLabel: "State",
                   cityDropdownLabel: "City",
 

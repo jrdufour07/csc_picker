@@ -599,13 +599,20 @@ class CSCPickerState extends State<CSCPicker> {
   @override
   void initState() {
     super.initState();
-    setDefaults();
+    getCountries();
     if (widget.countryFilter != null) {
       _countryFilter = widget.countryFilter!;
     }
-    getCountries();
-    // _selectedCity = widget.cityDropdownLabel;
-    // _selectedState = widget.stateDropdownLabel;
+    try{
+      _selectedCity = _cities.where(
+              (element) => element!.name!.toLowerCase() == widget.cityDropdownLabel.toLowerCase()).first;
+      _selectedState = _states.where(
+              (element) => element!.name!.toLowerCase() == widget.stateDropdownLabel.toLowerCase()).first;
+
+    }catch(e){
+      debugPrint(e.toString());
+    }
+    setDefaults();
   }
 
   Future<void> setDefaults() async {
@@ -724,7 +731,6 @@ class CSCPickerState extends State<CSCPicker> {
       //code added in if condition
       if (value.name != _selectedState?.name) {
         _cities.clear();
-        _selectedCity = City(name: widget.cityDropdownLabel);
         this.widget.onCityChanged!(null);
         _selectedState = value;
         getCities();
@@ -862,7 +868,7 @@ class CSCPickerState extends State<CSCPicker> {
 
   ///State Dropdown Widget
   Widget stateDropdown() {
-    if(widget.hideStatesWhenNone || _country.length == 0) return Container();
+    if(widget.hideStatesWhenNone && _states.length == 0) return Container();
     return DropdownWithSearch(
       title: widget.stateDropdownLabel,
       placeHolder: widget.stateSearchPlaceholder,
