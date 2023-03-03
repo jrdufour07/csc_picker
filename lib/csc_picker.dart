@@ -642,6 +642,10 @@ class CSCPickerState extends State<CSCPicker> {
             loading = false;
           });
         }
+      }else {
+        setState(() {
+          loading = false;
+        });
       }
     });
   }
